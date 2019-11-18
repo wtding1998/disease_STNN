@@ -124,7 +124,7 @@ if opt.patience > 0:
 #######################################################################################################################
 # Logs
 #######################################################################################################################
-logger = Logger(opt.outputdir, opt.xp, 700)
+logger = Logger(opt.outputdir, opt.xp, opt.checkpoint_interval)
 with open(os.path.join(opt.outputdir, opt.xp, 'config.json'), 'w') as f:
     json.dump(opt, f, sort_keys=True, indent=4)
 
@@ -188,15 +188,25 @@ for e in pb:
         logger.log('train_iter.mse_dyn', mse_dyn.item())
         logs_train['mse_dyn'] += mse_dyn.item() * len(batch)
         logs_train['loss_dyn'] += loss_dyn.item() * len(batch)
+    # ------------------------ Test ------------------------
+    if opt.test:
+        model.eval()
+        with torch.no_grad():
+            x_pred, _ = model.generate(opt.nt - opt.nt_train)
+            score = rmse(x_pred, test_data)
+        pb.set_postfix(loss=logs_train['loss'], test=score)
+        logger.log('test_epoch.rmse', score)
+    else:
+        pb.set_postfix(loss=logs_train['loss'])
     # --- logs ---
-    logs_train['mse_dec'] /= nex_dec
-    logs_train['mse_dyn'] /= nex_dyn
-    logs_train['loss_dyn'] /= nex_dyn
+    # TODO:
+    # logs_train['mse_dec'] /= nex_dec
+    # logs_train['mse_dyn'] /= nex_dyn
+    # logs_train['loss_dyn'] /= nex_dyn
     logs_train['loss'] = logs_train['mse_dec'] + logs_train['loss_dyn']
     logger.log('train_epoch', logs_train)
     # checkpoint
     # logger.log('train_epoch.lr', lr)
-    pb.set_postfix(loss=logs_train['loss'])
     logger.checkpoint(model)
     # schedule lr
     # if opt.patience > 0 and score < 12:
@@ -210,7 +220,7 @@ with torch.no_grad():
     x_pred, _ = model.generate(opt.nt - opt.nt_train)
     score_ts = rmse(x_pred, test_data, reduce=False)
     score = rmse(x_pred, test_data)
-logger.log('test_epoch.rmse', score)
-logger.log('test_epoch.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
+logger.log('test.rmse', score)
+logger.log('test.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
 
 logger.save(model)
