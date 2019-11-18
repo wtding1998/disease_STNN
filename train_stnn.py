@@ -29,10 +29,11 @@ p.add('--nt_train', type=int, help='time for training', default=100)
 # -- xp
 p.add('--outputdir', type=str, help='path to save xp', default='output')
 p.add('--xp', type=str, help='xp name', default='stnn')
+p.add('--auto', type=boolean_string, help='whether name outputdir and xp automatically', default=True)
 # -- model
 p.add('--mode', type=str, help='STNN mode (default|refine|discover)', default='default')
 p.add('--nz', type=int, help='laten factors size', default=1)
-p.add('--activation', type=str, help='dynamic module activation function (identity|tanh)', default='identity')
+p.add('--activation', type=str, help='dynamic module activation function (identity|tanh)', default='tanh')
 p.add('--khop', type=int, help='spatial depedencies order', default=1)
 p.add('--nhid', type=int, help='dynamic function hidden size', default=0)
 p.add('--nlayers', type=int, help='dynamic function num layers', default=1)
@@ -64,7 +65,11 @@ p.add('--checkpoint_interval', type=int, default=700, help='check point interval
 # parse
 opt = DotDict(vars(p.parse_args()))
 opt.mode = opt.mode if opt.mode in ('refine', 'discover') else None
+if opt.auto:
+    opt.outputdir = opt.dataset + "_STNN" 
+    opt.xp = opt.xp + "_" + get_time()
 opt.outputdir = get_dir(opt.outputdir)
+
 # cudnn
 if opt.device > -1:
     os.environ["CUDA_VISIBLE_DEVICES"] = str(opt.device)
