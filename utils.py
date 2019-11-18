@@ -1,6 +1,7 @@
 import os
 import json
 from collections import defaultdict
+import datetime
 
 import torch
 
@@ -58,3 +59,14 @@ class Logger(object):
         with open(self.log_path, 'w') as f:
             json.dump(self.logs, f, sort_keys=True, indent=4)
         torch.save(model.state_dict(), self.model_path)
+
+def boolean_string(s):
+    if s not in {'False', 'True'}:
+        raise ValueError('Not a valid boolean string')
+    return s == 'True'
+
+def get_dir(outputdir):
+    return os.path.abspath(os.path.join(os.getcwd(), "..", "output", outputdir))
+
+def get_time():
+    return datetime.datetime.now().strftime('%H-%M-%S-%Y-%m-%d')

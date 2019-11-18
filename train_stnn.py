@@ -14,7 +14,7 @@ import torch.backends.cudnn as cudnn
 
 
 from datasets import dataset_factory
-from utils import DotDict, Logger, rmse
+from utils import DotDict, Logger, rmse, boolean_string, get_dir, get_time
 from stnn import SaptioTemporalNN
 
 
@@ -49,9 +49,9 @@ p.add('--wd_z', type=float, help='weight decay on latent factors', default=1e-7)
 p.add('--l2_z', type=float, help='l2 between consecutives latent factors', default=0.)
 p.add('--l1_rel', type=float, help='l1 regularization on relation discovery mode', default=0.)
 # -- learning
-p.add('--batch_size', type=int, default=1000, help='batch size')
+p.add('--batch_size', type=int, default=10, help='batch size')
 p.add('--patience', type=int, default=150, help='number of epoch to wait before trigerring lr decay')
-p.add('--nepoch', type=int, default=10000, help='number of epochs to train for')
+p.add('--nepoch', type=int, default=10, help='number of epochs to train for')
 # -- gpu
 p.add('--device', type=int, default=-1, help='-1: cpu; > -1: cuda device id')
 # -- seed
@@ -198,7 +198,6 @@ for e in pb:
         x_pred, _ = model.generate(opt.nt - opt.nt_train)
         score_ts = rmse(x_pred, test_data, reduce=False)
         score = rmse(x_pred, test_data)
-    print(x_pred.size())
     logger.log('test_epoch.rmse', score)
     logger.log('test_epoch.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
     # checkpoint
@@ -206,9 +205,9 @@ for e in pb:
     pb.set_postfix(loss=logs_train['loss'], rmse_test=score)
     logger.checkpoint(model)
     # schedule lr
-    if opt.patience > 0 and score < 12:
-        lr_scheduler.step(score)
-    lr = optimizer.param_groups[0]['lr']
-    if lr <= 1e-5:
-        break
+    # if opt.patience > 0 and score < 12:
+    #     lr_scheduler.step(score)
+    # lr = optimizer.param_groups[0]['lr']
+    # if lr <= 1e-5:
+    #     break
 logger.save(model)
