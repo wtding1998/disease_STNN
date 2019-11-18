@@ -29,7 +29,10 @@ p.add('--nt_train', type=int, help='time for training', default=100)
 # -- xp
 p.add('--outputdir', type=str, help='path to save xp', default='output')
 p.add('--xp', type=str, help='xp name', default='stnn')
-p.add('--auto', type=boolean_string, help='whether name outputdir and xp automatically', default=True)
+p.add('--dir_auto', type=boolean_string, help='dataset_model', default=True)
+p.add('--xp_auto', type=boolean_string, help='time', default=False)
+p.add('--xp_time', type=boolean_string, help='xp_time', default=True)
+p.add('--auto', type=boolean_string, help='dataset_model + time', default=False)
 # -- model
 p.add('--mode', type=str, help='STNN mode (default|refine|discover)', default='default')
 p.add('--nz', type=int, help='laten factors size', default=1)
@@ -64,11 +67,18 @@ p.add('--checkpoint_interval', type=int, default=700, help='check point interval
 
 # parse
 opt = DotDict(vars(p.parse_args()))
-opt.mode = opt.mode if opt.mode in ('refine', 'discover') else None
-if opt.auto:
-    opt.outputdir = opt.dataset + "_STNN" 
+if opt.dir_auto:
+    opt.outputdir = opt.dataset + "_" + opt.mode 
+if opt.xp_time:
     opt.xp = opt.xp + "_" + get_time()
+if opt.xp_auto:
+    opt.xp = get_time()
+if opt.auto_all:
+    opt.outputdir = opt.dataset + "_" + opt.mode 
+    opt.xp = get_time()
 opt.outputdir = get_dir(opt.outputdir)
+opt.mode = opt.mode if opt.mode in ('refine', 'discover') else None
+
 
 # cudnn
 if opt.device > -1:
