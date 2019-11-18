@@ -23,7 +23,7 @@ def dataset_factory(data_dir, disease, nt_train, k=1):
 def get_data_set(data_dir, disease):
     # dataset configuration
     opt = DotDict()
-    opt.nt = 1096
+    opt.nt = 156
     opt.nx = 29
     opt.nd = 1
     opt.periode = opt.nt

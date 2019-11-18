@@ -24,8 +24,8 @@ from stnn import SaptioTemporalNN
 p = configargparse.ArgParser()
 # -- data
 p.add('--datadir', type=str, help='path to dataset', default='data')
-p.add('--dataset', type=str, help='dataset name', default='temper')
-p.add('--nt_train', type=int, help='time for training', default=700)
+p.add('--dataset', type=str, help='dataset name', default='aids')
+p.add('--nt_train', type=int, help='time for training', default=100)
 # -- xp
 p.add('--outputdir', type=str, help='path to save xp', default='output')
 p.add('--xp', type=str, help='xp name', default='stnn')
@@ -52,6 +52,8 @@ p.add('--l1_rel', type=float, help='l1 regularization on relation discovery mode
 p.add('--batch_size', type=int, default=10, help='batch size')
 p.add('--patience', type=int, default=150, help='number of epoch to wait before trigerring lr decay')
 p.add('--nepoch', type=int, default=10, help='number of epochs to train for')
+p.add('--test', type=boolean_string, default=False, help='test during training')
+
 # -- gpu
 p.add('--device', type=int, default=-1, help='-1: cpu; > -1: cuda device id')
 # -- seed
@@ -192,17 +194,9 @@ for e in pb:
     logs_train['loss_dyn'] /= nex_dyn
     logs_train['loss'] = logs_train['mse_dec'] + logs_train['loss_dyn']
     logger.log('train_epoch', logs_train)
-    # ------------------------ Test ------------------------
-    model.eval()
-    with torch.no_grad():
-        x_pred, _ = model.generate(opt.nt - opt.nt_train)
-        score_ts = rmse(x_pred, test_data, reduce=False)
-        score = rmse(x_pred, test_data)
-    logger.log('test_epoch.rmse', score)
-    logger.log('test_epoch.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
     # checkpoint
-    logger.log('train_epoch.lr', lr)
-    pb.set_postfix(loss=logs_train['loss'], rmse_test=score)
+    # logger.log('train_epoch.lr', lr)
+    pb.set_postfix(loss=logs_train['loss'])
     logger.checkpoint(model)
     # schedule lr
     # if opt.patience > 0 and score < 12:
@@ -210,4 +204,13 @@ for e in pb:
     # lr = optimizer.param_groups[0]['lr']
     # if lr <= 1e-5:
     #     break
+# ------------------------ Test ------------------------
+model.eval()
+with torch.no_grad():
+    x_pred, _ = model.generate(opt.nt - opt.nt_train)
+    score_ts = rmse(x_pred, test_data, reduce=False)
+    score = rmse(x_pred, test_data)
+logger.log('test_epoch.rmse', score)
+logger.log('test_epoch.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
+
 logger.save(model)
