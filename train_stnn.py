@@ -64,7 +64,7 @@ p.add('--checkpoint_interval', type=int, default=700, help='check point interval
 # parse
 opt = DotDict(vars(p.parse_args()))
 opt.mode = opt.mode if opt.mode in ('refine', 'discover') else None
-
+opt.outputdir = get_dir(opt.outputdir)
 # cudnn
 if opt.device > -1:
     os.environ["CUDA_VISIBLE_DEVICES"] = str(opt.device)
@@ -188,16 +188,7 @@ for e in pb:
         logger.log('train_iter.mse_dyn', mse_dyn.item())
         logs_train['mse_dyn'] += mse_dyn.item() * len(batch)
         logs_train['loss_dyn'] += loss_dyn.item() * len(batch)
-    # ------------------------ Test ------------------------
-    if opt.test:
-        model.eval()
-        with torch.no_grad():
-            x_pred, _ = model.generate(opt.nt - opt.nt_train)
-            score = rmse(x_pred, test_data)
-        pb.set_postfix(loss=logs_train['loss'], test=score)
-        logger.log('test_epoch.rmse', score)
-    else:
-        pb.set_postfix(loss=logs_train['loss'])
+
     # --- logs ---
     # TODO:
     # logs_train['mse_dec'] /= nex_dec
@@ -208,6 +199,16 @@ for e in pb:
     # checkpoint
     # logger.log('train_epoch.lr', lr)
     logger.checkpoint(model)
+    # ------------------------ Test ------------------------
+    if opt.test:
+        model.eval()
+        with torch.no_grad():
+            x_pred, _ = model.generate(opt.nt - opt.nt_train)
+            score = rmse(x_pred, test_data)
+        pb.set_postfix(loss=logs_train['loss'], test=score)
+        logger.log('test_epoch.rmse', score)
+    else:
+        pb.set_postfix(loss=logs_train['loss'])
     # schedule lr
     # if opt.patience > 0 and score < 12:
     #     lr_scheduler.step(score)
