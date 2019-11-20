@@ -53,7 +53,7 @@ p.add('--wd_z', type=float, help='weight decay on latent factors', default=1e-7)
 p.add('--l2_z', type=float, help='l2 between consecutives latent factors', default=0.)
 p.add('--l1_rel', type=float, help='l1 regularization on relation discovery mode', default=0.)
 # -- learning
-p.add('--batch_size', type=int, default=10, help='batch size')
+p.add('--batch_size', type=int, default=1000, help='batch size')
 p.add('--patience', type=int, default=150, help='number of epoch to wait before trigerring lr decay')
 p.add('--nepoch', type=int, default=10, help='number of epochs to train for')
 p.add('--test', type=boolean_string, default=False, help='test during training')
