@@ -238,5 +238,7 @@ with torch.no_grad():
     score = rmse(x_pred, test_data)
 logger.log('test.rmse', score)
 logger.log('test.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
-
+opt.test_loss = score
+with open(os.path.join(get_dir(opt.outputdir), opt.xp, 'config.json'), 'w') as f:
+    json.dump(opt, f, sort_keys=True, indent=4)
 logger.save(model)
