@@ -53,7 +53,7 @@ p.add('--wd_z', type=float, help='weight decay on latent factors', default=1e-7)
 p.add('--l2_z', type=float, help='l2 between consecutives latent factors', default=0.)
 p.add('--l1_rel', type=float, help='l1 regularization on relation discovery mode', default=0.)
 # -- learning
-p.add('--batch_size', type=int, default=1000, help='batch size')
+p.add('--batch_size', type=int, default=1131, help='batch size')
 p.add('--patience', type=int, default=150, help='number of epoch to wait before trigerring lr decay')
 p.add('--nepoch', type=int, default=10, help='number of epochs to train for')
 p.add('--test', type=boolean_string, default=False, help='test during training')
@@ -239,6 +239,8 @@ with torch.no_grad():
 logger.log('test.rmse', score)
 logger.log('test.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
 opt.test_loss = score
+# logs_train['loss'] = logs_train['mse_dec'] + logs_train['loss_dyn']
+opt.train_loss = logs_train['loss']
 with open(os.path.join(get_dir(opt.outputdir), opt.xp, 'config.json'), 'w') as f:
     json.dump(opt, f, sort_keys=True, indent=4)
 logger.save(model)
