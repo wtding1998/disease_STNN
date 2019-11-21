@@ -40,8 +40,8 @@ p.add('--activation', type=str, help='dynamic module activation function (identi
 p.add('--khop', type=int, help='spatial depedencies order', default=1)
 p.add('--nhid', type=int, help='dynamic function hidden size', default=0)
 p.add('--nlayers', type=int, help='dynamic function num layers', default=1)
-p.add('--dropout_f', type=float, help='latent factors dropout', default=.0)
-p.add('--dropout_d', type=float, help='dynamic function dropout', default=.0)
+p.add('--dropout_f', type=float, help='latent factors dropout', default=.5)
+p.add('--dropout_d', type=float, help='dynamic function dropout', default=.5)
 p.add('--lambd', type=float, help='lambda between reconstruction and dynamic losses', default=.1)
 # -- optim
 p.add('--lr', type=float, help='learning rate', default=3e-3)
