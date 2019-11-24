@@ -31,7 +31,7 @@ def get_data_set(data_dir, disease):
     # loading data
     data = np.genfromtxt(os.path.join(data_dir, file), encoding="utf-8-sig", delimiter=",")
     # change data
-    # data = change(data)
+    data = change(data)
     data = torch.Tensor(data).view(opt.nt, opt.nx, opt.nd)
     # load relations
     reletions_file = disease + "_relations.csv"
@@ -39,7 +39,7 @@ def get_data_set(data_dir, disease):
     relations = normalize(relations).unsqueeze(1)
     return opt, data, relations
 
-# def change(data):
-#     print("max = %f" %np.max(data))
-#     return data / np.max(data)
+def change(data):
+    print("max = %f" %np.max(data))
+    return data / np.max(data)
 
