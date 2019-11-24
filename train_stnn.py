@@ -2,6 +2,7 @@ import os
 import random
 import json
 from collections import defaultdict, OrderedDict
+import datetime
 
 import configargparse
 from tqdm import trange
@@ -14,7 +15,7 @@ import torch.backends.cudnn as cudnn
 
 
 from datasets import dataset_factory
-from utils import DotDict, Logger, rmse, boolean_string, get_dir, get_time
+from utils import DotDict, Logger, rmse, boolean_string, get_dir, get_time, time_dir
 from stnn import SaptioTemporalNN
 
 
@@ -79,7 +80,9 @@ if opt.auto_all:
 opt.outputdir = get_dir(opt.outputdir)
 opt.mode = opt.mode if opt.mode in ('refine', 'discover') else None
 
-
+opt.start = time_dir()
+start_st = datetime.datetime.now()
+opt.start_time = datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S')
 # cudnn
 if opt.device > -1:
     os.environ["CUDA_VISIBLE_DEVICES"] = str(opt.device)
@@ -241,6 +244,11 @@ logger.log('test.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)
 opt.test_loss = score
 # logs_train['loss'] = logs_train['mse_dec'] + logs_train['loss_dyn']
 opt.train_loss = logs_train['loss']
+
+opt.end = time_dir()
+end_st = datetime.datetime.now()
+opt.end_time = datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S')
+opt.time = str(end_st - start_st)
 with open(os.path.join(get_dir(opt.outputdir), opt.xp, 'config.json'), 'w') as f:
     json.dump(opt, f, sort_keys=True, indent=4)
 logger.save(model)
