@@ -3,7 +3,7 @@ import random
 import json
 from collections import defaultdict, OrderedDict
 import datetime
-
+import numpy as np
 import configargparse
 from tqdm import trange
 
@@ -64,7 +64,7 @@ p.add('--device', type=int, default=-1, help='-1: cpu; > -1: cuda device id')
 # -- seed
 p.add('--manualSeed', type=int, help='manual seed')
 # -- logs
-p.add('--checkpoint_interval', type=int, default=700, help='check point interval')
+p.add('--checkpoint_interval', type=int, default=100, help='check point interval')
 
 # parse
 opt = DotDict(vars(p.parse_args()))
@@ -239,6 +239,9 @@ with torch.no_grad():
     x_pred, _ = model.generate(opt.nt - opt.nt_train)
     score_ts = rmse(x_pred, test_data, reduce=False)
     score = rmse(x_pred, test_data)
+    x_pred = x_pred.view(opt.nt - opt.nt_train, opt.nx)
+    x_pred = x_pred.cpu().numpy()
+    np.savetxt(os.path.join(get_dir(opt.outputdir), opt.xp, 'pred.txt'), x_pred)
 logger.log('test.rmse', score)
 logger.log('test.ts', {t: {'rmse': scr.item()} for t, scr in enumerate(score_ts)})
 opt.test_loss = score
